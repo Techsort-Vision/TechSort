@@ -15,17 +15,21 @@ export const SITE = {
   name: "TechSort IT Solutions",
   short: "TechSort",
   tagline: "Transforming Ideas Into Powerful Digital Solutions",
-  email: "hello@techsort.io",
-  phone: "+1 (415) 555-0144",
-  whatsapp: "14155550144",
-  address: "1042 Innovation Ave, Suite 500, San Francisco, CA 94107",
+  email: "techsort45@gmail.com",
+  phone: "+91 9021598976",
+  phoneHref: "+919021598976",
+  secondaryPhone: "+91 7434986169",
+  secondaryPhoneHref: "+917434986169",
+  whatsapp: "https://wa.me/919021598976",
+  address: "Surat, Gujarat, India",
   hours: "Mon–Fri · 9:00 — 19:00",
   socials: {
     twitter: "https://twitter.com",
     linkedin: "https://linkedin.com",
     github: "https://github.com",
-    instagram: "https://instagram.com",
+    instagram: "https://www.instagram.com/techs.ort?utm_source=qr&igsh=MThzbW0wd28zampndg==",
     dribbble: "https://dribbble.com",
+    whatsapp: "https://wa.me/919021598976",
   },
 };
 
@@ -147,3 +151,25 @@ export const CASE_STUDIES = [
   { title: "Vault Pay — Compliance-first fintech", client: "Vault Pay", result: "SOC2 in 6 mo", image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80" },
   { title: "Pulse Health — Patient portal at scale", client: "Pulse", result: "1.2M users", image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80" },
 ];
+
+export const WEB3FORMS_ACCESS_KEY = "dfac954a-ddf4-42aa-8425-0e677aad4aff";
+
+export async function submitWeb3Form(data: Record<string, any>, subject: string) {
+  const response = await fetch("https://api.web3forms.com/submit", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      ...data,
+      subject,
+    }),
+  });
+  
+  if (!response.ok) {
+    throw new Error("Form submission failed");
+  }
+  
+  return response.json();
+}

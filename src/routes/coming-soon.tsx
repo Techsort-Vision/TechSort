@@ -1,5 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Button, Form, Input, message } from "antd";
 import { useEffect, useState } from "react";
+import { FormSuccessModal } from "@/components/site/FormSuccessModal";
+import { FormErrorModal } from "@/components/site/FormErrorModal";
+import { submitWeb3Form, WEB3FORMS_ACCESS_KEY } from "@/lib/site-data";
 
 export const Route = createFileRoute("/coming-soon")({
   head: () => ({
@@ -16,7 +20,22 @@ export const Route = createFileRoute("/coming-soon")({
 function Soon() {
   const target = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).getTime();
   const [t, setT] = useState(target - Date.now());
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [errorOpen, setErrorOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   useEffect(() => { const i = setInterval(() => setT(target - Date.now()), 1000); return () => clearInterval(i); }, [target]);
+
+  const handleSubmit = async (values: Record<string, string>) => {
+    setSubmitting(true);
+    try {
+      await submitWeb3Form(values, "TechSort coming soon notification");
+      setSuccessOpen(true);
+    } catch {
+      setErrorOpen(true);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const days = Math.max(0, Math.floor(t / (1000 * 60 * 60 * 24)));
   const hours = Math.max(0, Math.floor((t / (1000 * 60 * 60)) % 24));
@@ -45,13 +64,30 @@ function Soon() {
           ))}
         </div>
 
-        <form onSubmit={(e) => e.preventDefault()} className="mt-10 flex gap-2 max-w-md mx-auto">
-          <input required type="email" placeholder="you@company.com" className="flex-1 rounded-full bg-white/5 border border-white/10 px-5 py-3 text-sm outline-none focus:border-sky" />
-          <button className="rounded-full bg-brand animate-gradient text-white px-5 py-3 text-sm font-semibold">Notify me</button>
-        </form>
+        <Form onFinish={handleSubmit} className="ant-form-modern mt-10 flex gap-2 max-w-md mx-auto" requiredMark={false}>
+          <Form.Item hidden name="access_key" initialValue={WEB3FORMS_ACCESS_KEY}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="email" className="flex-1" rules={[{ required: true, type: "email", message: "Please enter a valid email" }]}>
+            <Input placeholder="you@company.com" />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" loading={submitting}>Notify me</Button>
+          </Form.Item>
+        </Form>
 
         <Link to="/" className="mt-8 inline-block text-sm text-muted-foreground hover:text-foreground">← Back home</Link>
       </div>
+      <FormSuccessModal
+        open={successOpen}
+        onClose={() => setSuccessOpen(false)}
+        title="Notification request submitted"
+        description="Perfect. We will notify you as soon as this page goes live."
+      />
+      <FormErrorModal 
+        open={errorOpen} 
+        onClose={() => setErrorOpen(false)} 
+      />
     </section>
   );
 }

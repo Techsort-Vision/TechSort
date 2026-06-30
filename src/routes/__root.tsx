@@ -9,6 +9,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
+import { ConfigProvider } from "antd";
 import { useEffect } from "react";
 
 import appCss from "../styles.css?url";
@@ -119,13 +120,41 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Navbar />
-      <main className="min-h-screen">
-        <RouteTransition />
-      </main>
-      <Footer />
-      <SubscribeModal />
-      <WhatsAppFab />
+      <ConfigProvider
+        theme={{
+          token: {
+            colorPrimary: "#0b74d9",
+            borderRadius: 14,
+            colorText: "#222733",
+            colorTextPlaceholder: "#7a8392",
+            colorBorder: "rgba(0, 0, 0, 0.12)",
+            fontFamily: "Inter, system-ui, sans-serif",
+          },
+          components: {
+            Button: {
+              controlHeight: 44,
+              fontWeight: 700,
+            },
+            Input: {
+              controlHeight: 44,
+              activeBorderColor: "#0b74d9",
+              hoverBorderColor: "#0b74d9",
+            },
+            Select: {
+              controlHeight: 44,
+              optionSelectedBg: "rgba(11, 116, 217, 0.10)",
+            },
+          },
+        }}
+      >
+        <Navbar />
+        <main className="min-h-screen">
+          <RouteTransition />
+        </main>
+        <Footer />
+        <SubscribeModal />
+        <WhatsAppFab />
+      </ConfigProvider>
     </QueryClientProvider>
   );
 }

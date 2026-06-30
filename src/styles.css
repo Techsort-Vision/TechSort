@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap");
+@import "antd/dist/reset.css";
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
@@ -193,6 +194,58 @@ html.light .bg-background\/85 { background-color: oklch(1 0 0 / 0.85) !important
 
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .ant-form-modern .ant-form-item { margin-bottom: 0; }
+  .ant-form-modern .ant-form-item-label { padding-bottom: 6px; }
+  .ant-form-modern .ant-form-item-label > label {
+    color: var(--muted-foreground);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .ant-form-modern .ant-input,
+  .ant-form-modern .ant-input-affix-wrapper,
+  .ant-form-modern .ant-select-selector,
+  .ant-form-modern .ant-input-number,
+  .ant-form-modern .ant-picker {
+    background: color-mix(in oklab, var(--background) 55%, transparent) !important;
+    border-color: var(--border) !important;
+    color: var(--foreground) !important;
+    box-shadow: none !important;
+  }
+  .ant-form-modern .ant-input:hover,
+  .ant-form-modern .ant-input:focus,
+  .ant-form-modern .ant-input-affix-wrapper:hover,
+  .ant-form-modern .ant-input-affix-wrapper-focused,
+  .ant-form-modern .ant-select-focused .ant-select-selector,
+  .ant-form-modern .ant-select-selector:hover {
+    border-color: var(--primary) !important;
+  }
+  .ant-form-modern .ant-input::placeholder,
+  .ant-form-modern .ant-select-selection-placeholder,
+  .ant-form-modern .ant-input-affix-wrapper input::placeholder {
+    color: var(--muted-foreground) !important;
+  }
+  .ant-form-modern .ant-select-selection-item,
+  .ant-form-modern .ant-radio-wrapper,
+  .ant-form-modern .ant-upload,
+  .ant-form-modern .ant-upload-hint,
+  .ant-form-modern .ant-upload-text {
+    color: var(--foreground) !important;
+  }
+  .ant-form-modern .ant-upload-drag {
+    background: color-mix(in oklab, var(--background) 55%, transparent) !important;
+    border-color: var(--border) !important;
+  }
+  .ant-form-modern .ant-upload-drag:hover { border-color: var(--primary) !important; }
+  .ant-form-modern .ant-form-item-explain-error { margin-top: 4px; font-size: 12px; }
+  .ant-form-modern .ant-btn-primary {
+    background: var(--primary);
+    color: var(--primary-foreground);
+    box-shadow: var(--shadow-glow-sm);
+  }
+  .ant-form-modern .ant-btn-primary:hover { background: var(--primary) !important; opacity: 0.9; }
 
   /* Animations — subtle */
   @keyframes float {

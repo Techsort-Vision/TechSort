@@ -12,6 +12,7 @@ import "util";
 import "crypto";
 import "async_hooks";
 import "stream";
+import "../_libs/scheduler.mjs";
 import "../_libs/isbot.mjs";
 const SplitNotFoundComponent = () => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-20 text-center", children: [
   /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl font-bold gradient-text", children: "Service not found" }),

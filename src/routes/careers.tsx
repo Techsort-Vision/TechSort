@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Button, Form, Input, Select, Upload, message } from "antd";
 import { useState } from "react";
-import { Briefcase, Coffee, GraduationCap, Heart, MapPin, Upload } from "lucide-react";
+import { Briefcase, Coffee, GraduationCap, Heart, MapPin, Upload as UploadIcon } from "lucide-react";
 import { PageHeader } from "@/components/site/PageHeader";
 import { Reveal } from "@/components/site/Reveal";
-import { GlowButton } from "@/components/site/GlowButton";
-import { JOBS } from "@/lib/site-data";
+import { FormSuccessModal } from "@/components/site/FormSuccessModal";
+import { FormErrorModal } from "@/components/site/FormErrorModal";
+import { JOBS, submitWeb3Form, WEB3FORMS_ACCESS_KEY } from "@/lib/site-data";
 
 export const Route = createFileRoute("/careers")({
   head: () => ({
@@ -28,7 +30,24 @@ const BENEFITS = [
 const PROCESS = ["Apply", "Intro call", "Skills interview", "Team chat", "Offer"];
 
 function Careers() {
-  const [done, setDone] = useState(false);
+  const [form] = Form.useForm();
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [errorOpen, setErrorOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (values: Record<string, unknown>) => {
+    setSubmitting(true);
+    try {
+      await submitWeb3Form(values, "TechSort career application");
+      form.resetFields();
+      setSuccessOpen(true);
+    } catch {
+      setErrorOpen(true);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <>
       <PageHeader breadcrumbs={[{ label: "Careers" }]} eyebrow="We're hiring" title="Build the future with us" subtitle="Premium work, premium teammates, premium benefits. If you sweat the details — we want to talk." />
@@ -102,27 +121,50 @@ function Careers() {
           <div className="glass-strong gradient-border rounded-3xl p-8 md:p-10">
             <h2 className="text-2xl font-bold"><span className="gradient-text">Apply now</span></h2>
             <p className="mt-1 text-sm text-muted-foreground">Send us your details and we'll reply within 5 business days.</p>
-            {!done ? (
-              <form className="mt-6 grid gap-3" onSubmit={(e) => { e.preventDefault(); setDone(true); }}>
-                <input required placeholder="Full name" className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm outline-none focus:border-sky" />
-                <input required type="email" placeholder="Email" className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm outline-none focus:border-sky" />
-                <select required className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm outline-none focus:border-sky">
-                  <option value="">Choose a role</option>
-                  {JOBS.map((j) => <option key={j.title}>{j.title}</option>)}
-                </select>
-                <textarea required placeholder="Why TechSort?" rows={4} className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm outline-none focus:border-sky" />
-                <label className="rounded-xl bg-white/5 border border-dashed border-white/15 px-4 py-6 text-sm flex items-center justify-center gap-2 cursor-pointer hover:bg-white/10">
-                  <Upload className="size-4" /> Upload resume (PDF)
-                  <input type="file" accept=".pdf,.doc,.docx" className="hidden" />
-                </label>
-                <GlowButton className="mt-2">Submit application</GlowButton>
-              </form>
-            ) : (
-              <div className="mt-6 rounded-xl glass p-6 text-center text-sky">✓ Thanks! We'll be in touch within 5 business days.</div>
-            )}
+              <Form form={form} layout="vertical" className="ant-form-modern mt-6 grid gap-3" onFinish={handleSubmit} requiredMark={false}>
+                <Form.Item hidden name="access_key" initialValue={WEB3FORMS_ACCESS_KEY}>
+                  <Input />
+                </Form.Item>
+                <Form.Item name="name" rules={[{ required: true, message: "Please enter your full name" }]}>
+                  <Input placeholder="Full name" />
+                </Form.Item>
+                <Form.Item name="email" rules={[{ required: true, type: "email", message: "Please enter a valid email" }]}>
+                  <Input placeholder="Email" />
+                </Form.Item>
+                <Form.Item name="role" rules={[{ required: true, message: "Please choose a role" }]}>
+                  <Select
+                    placeholder="Choose a role"
+                    options={JOBS.map((j) => ({ label: j.title, value: j.title }))}
+                  />
+                </Form.Item>
+                <Form.Item name="why">
+                  <Input.TextArea placeholder="Why TechSort?" rows={4} />
+                </Form.Item>
+                <Form.Item name="resume" valuePropName="fileList" getValueFromEvent={(event) => Array.isArray(event) ? event : event?.fileList}>
+                  <Upload.Dragger beforeUpload={() => false} maxCount={1} accept=".pdf,.doc,.docx">
+                    <div className="flex items-center justify-center gap-2 text-sm">
+                      <UploadIcon className="size-4" /> Upload resume (PDF)
+                    </div>
+                  </Upload.Dragger>
+                </Form.Item>
+                <Form.Item>
+                  <Button type="primary" htmlType="submit" loading={submitting} block>Submit application</Button>
+                </Form.Item>
+              </Form>
           </div>
         </div>
       </section>
+
+      <FormSuccessModal
+        open={successOpen}
+        onClose={() => setSuccessOpen(false)}
+        title="Application submitted"
+        description="Thanks! Your application is with us. We will reply within 5 business days."
+      />
+      <FormErrorModal 
+        open={errorOpen} 
+        onClose={() => setErrorOpen(false)} 
+      />
     </>
   );
 }

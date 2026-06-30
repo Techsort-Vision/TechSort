@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Github, Instagram, Linkedin, Mail, MapPin, Phone, Twitter, Clock, Dribbble } from "lucide-react";
+import { Clock, Instagram, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { NAV_LINKS, SITE, SERVICES } from "@/lib/site-data";
 
@@ -22,13 +22,19 @@ export function Footer() {
             <p className="mt-4 text-sm text-muted-foreground max-w-sm">A modern IT studio building premium digital products for ambitious teams worldwide.</p>
             <div className="mt-5 grid gap-2 text-sm text-muted-foreground">
               <a href={`mailto:${SITE.email}`} className="flex items-center gap-2 hover:text-foreground"><Mail className="size-4 text-sky" />{SITE.email}</a>
-              <a href={`tel:${SITE.phone}`} className="flex items-center gap-2 hover:text-foreground"><Phone className="size-4 text-sky" />{SITE.phone}</a>
+              <div className="flex items-start gap-2">
+                <Phone className="size-4 text-sky mt-0.5" />
+                <div className="grid gap-1">
+                  <a href={`tel:${SITE.phoneHref}`} className="hover:text-foreground">{SITE.phone}</a>
+                  <a href={`tel:${SITE.secondaryPhoneHref}`} className="hover:text-foreground">{SITE.secondaryPhone}</a>
+                </div>
+              </div>
               <div className="flex items-start gap-2"><MapPin className="size-4 text-sky mt-0.5" />{SITE.address}</div>
               <div className="flex items-center gap-2"><Clock className="size-4 text-sky" />{SITE.hours}</div>
             </div>
             <div className="mt-5 flex gap-2">
-              {[{ Icon: Twitter, href: SITE.socials.twitter }, { Icon: Linkedin, href: SITE.socials.linkedin }, { Icon: Github, href: SITE.socials.github }, { Icon: Instagram, href: SITE.socials.instagram }, { Icon: Dribbble, href: SITE.socials.dribbble }].map(({ Icon, href }, i) => (
-                <a key={i} href={href} target="_blank" rel="noreferrer" className="size-9 rounded-lg glass grid place-items-center hover:glow-sm hover:scale-110 transition">
+              {[{ Icon: Instagram, href: SITE.socials.instagram, label: "Instagram" }, { Icon: MessageCircle, href: SITE.socials.whatsapp, label: "WhatsApp" }].map(({ Icon, href, label }) => (
+                <a key={label} href={href} target="_blank" rel="noreferrer" aria-label={label} className="size-9 rounded-lg glass grid place-items-center hover:glow-sm hover:scale-110 transition">
                   <Icon className="size-4" />
                 </a>
               ))}

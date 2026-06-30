@@ -205,18 +205,25 @@ function About() {
 
 function WhyUs() {
   return (
-    <section className="relative py-24 md:py-32">
+    <section className="relative overflow-hidden py-20 md:py-28">
+      <div className="absolute inset-x-0 top-0 -z-10 h-72 bg-[radial-gradient(circle_at_50%_0%,oklch(0.52_0.17_255/0.14),transparent_68%)]" />
       <div className="mx-auto max-w-7xl px-4 md:px-8">
         <SectionHeading eyebrow="Why Choose Us" title="Built different, on purpose" subtitle="Six reasons teams pick TechSort over the big agencies — and rarely look back." />
-        <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:mt-14 lg:grid-cols-3 lg:gap-5">
           {WHY_US.map((w, i) => (
             <Reveal key={w.title} delay={i}>
-              <div className="group relative h-full glass-strong gradient-border rounded-2xl p-6 hover:-translate-y-1 transition-transform">
-                <div className="size-12 rounded-xl bg-brand grid place-items-center text-white animate-gradient mb-4 group-hover:scale-110 transition">
-                  <Icon name={w.icon} className="size-6" />
+              <div className="group relative h-full overflow-hidden rounded-2xl border border-border bg-surface p-5 shadow-[0_20px_70px_-52px_rgba(0,0,0,0.55)] transition duration-300 hover:-translate-y-1 hover:border-primary/35 hover:shadow-[0_28px_90px_-58px_oklch(0.52_0.17_255/0.65)] sm:p-6">
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/45 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="mb-8 flex items-start justify-between gap-4">
+                  <div className="grid size-12 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-[0_14px_34px_-18px_oklch(0.52_0.17_255/0.75)] transition duration-300 group-hover:scale-105">
+                    <Icon name={w.icon} className="size-6" />
+                  </div>
+                  <span className="rounded-full border border-border px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">
+                    0{i + 1}
+                  </span>
                 </div>
-                <h3 className="text-lg font-semibold">{w.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{w.desc}</p>
+                <h3 className="text-lg font-semibold text-foreground">{w.title}</h3>
+                <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">{w.desc}</p>
               </div>
             </Reveal>
           ))}
@@ -255,77 +262,114 @@ function Tech() {
   const [tab, setTab] = useState(TECH_CATEGORIES[0].id);
   const current = TECH_CATEGORIES.find((c) => c.id === tab)!;
   const items = current.items;
+  const featuredItems = items.slice(0, 4);
+  const orbitItems = items.slice(0, 10);
   return (
-    <section className="relative py-24 md:py-32 overflow-hidden">
+    <section className="relative overflow-hidden py-20 md:py-28">
+      <div className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,transparent,oklch(0.52_0.17_255/0.06),transparent)]" />
       <div className="mx-auto max-w-7xl px-4 md:px-8">
         <SectionHeading eyebrow="Our Stack" title="A holographic toolbox" subtitle="Switch categories — watch the stack reform around the core. Modern, battle-tested, picked for speed and developer joy." />
 
-        <div className="mt-12 flex flex-wrap justify-center gap-2">
+        <div className="scrollbar-hide -mx-4 mt-10 flex snap-x gap-2 overflow-x-auto px-4 pb-2 sm:mx-0 sm:flex-wrap sm:justify-center sm:overflow-visible sm:px-0">
           {TECH_CATEGORIES.map((c) => (
             <button
               key={c.id}
               onClick={() => setTab(c.id)}
-              className={`relative px-5 py-2.5 rounded-full text-sm font-medium transition-all ${tab === c.id ? "bg-brand text-white animate-gradient glow-sm" : "glass hover:bg-white/70"}`}
+              className={`relative shrink-0 snap-start rounded-full px-4 py-2.5 text-sm font-semibold transition-all sm:px-5 ${tab === c.id ? "bg-primary text-primary-foreground shadow-[0_14px_34px_-22px_oklch(0.52_0.17_255/0.9)]" : "border border-border bg-surface text-foreground hover:border-primary/30 hover:text-primary"}`}
             >
               {c.label}
             </button>
           ))}
         </div>
 
-        {/* Orbital holographic stage */}
-        <div className="relative mt-16 mx-auto h-[520px] md:h-[600px] max-w-3xl">
-          {/* concentric rings */}
-          <div className="absolute inset-0 grid place-items-center pointer-events-none">
-            <div className="absolute size-[260px] md:size-[320px] rounded-full border border-border" />
-            <div className="absolute size-[400px] md:size-[480px] rounded-full border border-border/70" />
-            <div className="absolute size-[520px] md:size-[600px] rounded-full border border-border/50" />
-            <div className="absolute size-[180px] rounded-full bg-primary/20 blur-3xl" />
+        <div className="mx-auto mt-12 grid max-w-6xl items-center gap-8 lg:mt-16 lg:grid-cols-[0.86fr_1.14fr]">
+          <div className="rounded-3xl border border-border bg-surface p-5 shadow-[0_24px_90px_-65px_rgba(0,0,0,0.65)] sm:p-6">
+            <div className="flex items-center gap-4">
+              <motion.div
+                key={`${tab}-logo`}
+                initial={{ scale: 0.92, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                className="grid size-16 shrink-0 place-items-center rounded-2xl border border-primary/25 bg-background shadow-[0_18px_60px_-40px_oklch(0.52_0.17_255/0.85)]"
+              >
+                <img src={logo} alt="" className="size-10 object-contain" />
+              </motion.div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-primary">{current.label}</p>
+                <h3 className="mt-1 text-2xl font-semibold text-foreground">Tools we use daily</h3>
+              </div>
+            </div>
 
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`${tab}-grid`}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25 }}
+                className="mt-6 grid grid-cols-2 gap-3"
+              >
+                {items.map((t) => (
+                  <div key={t} className="rounded-2xl border border-border bg-background/60 px-3 py-3 text-sm font-semibold text-foreground">
+                    {t}
+                  </div>
+                ))}
+              </motion.div>
+            </AnimatePresence>
           </div>
 
-          {/* core logo */}
-          <div className="absolute inset-0 grid place-items-center">
-            <motion.div
-              key={tab}
-              initial={{ scale: 0.7, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="relative size-32 md:size-40 rounded-full glass-strong gradient-border grid place-items-center glow"
-            >
-              <img src={logo} alt="" className="size-20 object-contain" />
-              <span className="absolute inset-0 rounded-full ring-1 ring-[oklch(0.62_0.20_250/0.4)] animate-glow-pulse" />
-            </motion.div>
+          <div className="relative hidden min-h-[560px] lg:block">
+            <div className="absolute inset-0 grid place-items-center">
+              <div className="absolute size-[260px] rounded-full border border-border" />
+              <div className="absolute size-[410px] rounded-full border border-border/70" />
+              <div className="absolute size-[540px] rounded-full border border-border/50" />
+              <div className="absolute size-[210px] rounded-full bg-primary/15 blur-3xl" />
+              <motion.div
+                key={`${tab}-core`}
+                initial={{ scale: 0.78, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                className="relative grid size-40 place-items-center rounded-[2rem] border border-primary/25 bg-surface shadow-[0_25px_80px_-52px_oklch(0.52_0.17_255/0.9)]"
+              >
+                <img src={logo} alt="" className="size-20 object-contain" />
+                <span className="absolute inset-0 rounded-[2rem] ring-1 ring-primary/25 animate-glow-pulse" />
+              </motion.div>
+            </div>
+
+            <AnimatePresence mode="wait">
+              <motion.div key={`${tab}-orbit`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} className="absolute inset-0">
+                {orbitItems.map((t, i) => {
+                  const angle = (-90 + (i / orbitItems.length) * 360) * (Math.PI / 180);
+                  const radius = i % 2 === 0 ? 42 : 34;
+                  const cx = 50 + Math.cos(angle) * radius;
+                  const cy = 50 + Math.sin(angle) * radius;
+                  return (
+                    <motion.div
+                      key={t}
+                      initial={{ opacity: 0, scale: 0.82 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: i * 0.035, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                      style={{ left: `${cx}%`, top: `${cy}%`, willChange: "transform, opacity" }}
+                      className="absolute -translate-x-1/2 -translate-y-1/2"
+                    >
+                      <div className="rounded-2xl border border-border bg-surface px-4 py-2.5 text-sm font-semibold text-foreground shadow-[0_16px_46px_-34px_rgba(0,0,0,0.7)] transition hover:-translate-y-0.5 hover:border-primary/40 hover:text-primary">
+                        {t}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            </AnimatePresence>
+
+            <div className="absolute bottom-6 left-1/2 grid -translate-x-1/2 grid-cols-4 gap-2">
+              {featuredItems.map((item) => (
+                <span key={item} className="h-1.5 w-10 rounded-full bg-primary/25" />
+              ))}
+            </div>
           </div>
-
-          {/* orbiting tech chips */}
-          <AnimatePresence mode="wait">
-            <motion.div key={tab} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} className="absolute inset-0">
-              {items.map((t, i) => {
-                const angle = (i / items.length) * Math.PI * 2;
-                const radius = 44;
-                const cx = 50 + Math.cos(angle) * radius;
-                const cy = 50 + Math.sin(angle) * radius;
-                return (
-                  <motion.div
-                    key={t}
-                    initial={{ opacity: 0, scale: 0.7 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: i * 0.035, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                    style={{ left: `${cx}%`, top: `${cy}%`, willChange: "transform, opacity" }}
-                    className="absolute -translate-x-1/2 -translate-y-1/2 group"
-                  >
-                    <div className="relative glass-strong gradient-border rounded-2xl px-4 py-2.5 hover:scale-105 transition cursor-default whitespace-nowrap">
-                      <span className="text-xs md:text-sm font-semibold">{t}</span>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </motion.div>
-          </AnimatePresence>
-
         </div>
 
-        <div className="mt-8 text-center">
+        <div className="mt-10 text-center">
           <MagneticButton to="/technologies" variant="ghost">Explore full stack <ArrowRight className="size-4" /></MagneticButton>
         </div>
       </div>

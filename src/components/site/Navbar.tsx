@@ -127,7 +127,7 @@ export function Navbar() {
               </nav>
               <div className="p-5 border-t border-white/[0.06] grid gap-3">
                 <GlowButton to="/request-quote" className="w-full">Get a Quote</GlowButton>
-                <p className="text-xs text-muted-foreground text-center">{SITE.phone}</p>
+                <a href={`tel:${SITE.phoneHref}`} className="text-xs text-muted-foreground text-center hover:text-foreground">{SITE.phone}</a>
               </div>
             </motion.aside>
           </>

@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Button, Form, Input, Select, message } from "antd";
 import { useState } from "react";
 import { ChevronDown, Clock, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { PageHeader } from "@/components/site/PageHeader";
-import { GlowButton } from "@/components/site/GlowButton";
-import { SITE, SERVICES, FAQS } from "@/lib/site-data";
+import { FormSuccessModal } from "@/components/site/FormSuccessModal";
+import { FormErrorModal } from "@/components/site/FormErrorModal";
+import { SITE, SERVICES, FAQS, submitWeb3Form, WEB3FORMS_ACCESS_KEY } from "@/lib/site-data";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -20,8 +22,25 @@ export const Route = createFileRoute("/contact")({
 const BUDGETS = ["< $5k", "$5k–$15k", "$15k–$50k", "$50k+"];
 
 function Contact() {
-  const [done, setDone] = useState(false);
+  const [form] = Form.useForm();
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [errorOpen, setErrorOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [open, setOpen] = useState<number | null>(null);
+
+  const handleSubmit = async (values: Record<string, string>) => {
+    setSubmitting(true);
+    try {
+      await submitWeb3Form(values, "TechSort contact inquiry");
+      form.resetFields();
+      setSuccessOpen(true);
+    } catch {
+      setErrorOpen(true);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <>
       <PageHeader breadcrumbs={[{ label: "Contact" }]} eyebrow="Say hi" title="Let's build something together" subtitle="Tell us about your project — we'll respond within 24 hours with a tailored proposal." />
@@ -30,35 +49,43 @@ function Contact() {
         <div className="mx-auto max-w-7xl px-4 md:px-8 grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 glass-strong gradient-border rounded-3xl p-8">
             <h2 className="text-2xl font-bold"><span className="gradient-text">Project inquiry</span></h2>
-            {!done ? (
-              <form className="mt-6 grid sm:grid-cols-2 gap-3" onSubmit={(e) => { e.preventDefault(); setDone(true); }}>
-                <input required placeholder="Full name *" className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm outline-none focus:border-sky" />
-                <input required type="email" placeholder="Email *" className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm outline-none focus:border-sky" />
-                <input placeholder="Phone" className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm outline-none focus:border-sky" />
-                <input placeholder="Company" className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm outline-none focus:border-sky" />
-                <select required className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm outline-none focus:border-sky sm:col-span-1">
-                  <option value="">Select a service *</option>
-                  {SERVICES.map((s) => <option key={s.slug}>{s.title}</option>)}
-                </select>
-                <select required className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm outline-none focus:border-sky">
-                  <option value="">Budget *</option>
-                  {BUDGETS.map((b) => <option key={b}>{b}</option>)}
-                </select>
-                <textarea required rows={5} placeholder="Tell us about your project *" className="sm:col-span-2 rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm outline-none focus:border-sky" />
-                <div className="sm:col-span-2"><GlowButton className="w-full">Send message</GlowButton></div>
-              </form>
-            ) : (
-              <div className="mt-6 rounded-xl glass p-8 text-center">
-                <div className="text-3xl">✓</div>
-                <h3 className="mt-2 text-xl font-bold gradient-text">Message received</h3>
-                <p className="mt-2 text-sm text-muted-foreground">We'll be in touch within 24 hours. Meanwhile, check out our recent work.</p>
-              </div>
-            )}
+              <Form form={form} layout="vertical" className="ant-form-modern mt-6 grid sm:grid-cols-2 gap-3" onFinish={handleSubmit} requiredMark={false}>
+                <Form.Item hidden name="access_key" initialValue={WEB3FORMS_ACCESS_KEY}>
+                  <Input />
+                </Form.Item>
+                <Form.Item name="name" rules={[{ required: true, message: "Please enter your full name" }]}>
+                  <Input placeholder="Full name *" />
+                </Form.Item>
+                <Form.Item name="email" rules={[{ required: true, type: "email", message: "Please enter a valid email" }]}>
+                  <Input placeholder="Email *" />
+                </Form.Item>
+                <Form.Item name="phone" rules={[{ required: true, message: "Please enter your phone number" }]}>
+                  <Input placeholder="Phone *" />
+                </Form.Item>
+                <Form.Item name="company">
+                  <Input placeholder="Company" />
+                </Form.Item>
+                <Form.Item name="service" rules={[{ required: true, message: "Please select a service" }]}>
+                  <Select
+                    placeholder="Select a service *"
+                    options={SERVICES.map((s) => ({ label: s.title, value: s.slug }))}
+                  />
+                </Form.Item>
+                <Form.Item name="budget">
+                  <Select placeholder="Budget" options={BUDGETS.map((b) => ({ label: b, value: b }))} />
+                </Form.Item>
+                <Form.Item className="sm:col-span-2" name="message">
+                  <Input.TextArea rows={5} placeholder="Tell us about your project" />
+                </Form.Item>
+                <Form.Item className="sm:col-span-2">
+                  <Button type="primary" htmlType="submit" loading={submitting} block>Send message</Button>
+                </Form.Item>
+              </Form>
           </div>
 
           <div className="grid gap-4 content-start">
             <InfoCard Icon={Mail} title="Email" value={SITE.email} href={`mailto:${SITE.email}`} />
-            <InfoCard Icon={Phone} title="Phone" value={SITE.phone} href={`tel:${SITE.phone}`} />
+            <PhoneCard />
             <InfoCard Icon={MapPin} title="Office" value={SITE.address} />
             <InfoCard Icon={Clock} title="Hours" value={SITE.hours} />
             <a href={`https://wa.me/${SITE.whatsapp}`} target="_blank" rel="noreferrer" className="glass-strong gradient-border rounded-2xl p-5 flex items-center gap-3 hover:glow-sm transition">
@@ -75,7 +102,7 @@ function Contact() {
           <div className="lg:col-span-2 glass-strong gradient-border rounded-3xl overflow-hidden aspect-[16/9]">
             <iframe
               title="Office location"
-              src="https://www.google.com/maps?q=San+Francisco&output=embed"
+              src="https://www.google.com/maps?q=Surat,India&output=embed"
               className="size-full grayscale-[40%] contrast-[1.1] opacity-90"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
@@ -109,6 +136,17 @@ function Contact() {
           </div>
         </div>
       </section>
+
+      <FormSuccessModal
+        open={successOpen}
+        onClose={() => setSuccessOpen(false)}
+        title="Message submitted"
+        description="Thanks! Your inquiry is with TechSort. We will contact you within 24 hours."
+      />
+      <FormErrorModal 
+        open={errorOpen} 
+        onClose={() => setErrorOpen(false)} 
+      />
     </>
   );
 }
@@ -123,5 +161,20 @@ function InfoCard({ Icon, title, value, href }: { Icon: React.ComponentType<{ cl
         <div className="text-sm font-medium">{value}</div>
       </div>
     </C>
+  );
+}
+
+function PhoneCard() {
+  return (
+    <div className="glass-strong gradient-border rounded-2xl p-5 flex items-center gap-3 hover:glow-sm transition">
+      <div className="size-10 rounded-xl bg-brand animate-gradient grid place-items-center text-white"><Phone className="size-5" /></div>
+      <div>
+        <div className="text-xs uppercase tracking-wider text-muted-foreground">Phone</div>
+        <div className="mt-1 grid gap-1 text-sm font-medium">
+          <a href={`tel:${SITE.phoneHref}`} className="hover:text-sky">{SITE.phone}</a>
+          <a href={`tel:${SITE.secondaryPhoneHref}`} className="hover:text-sky">{SITE.secondaryPhone}</a>
+        </div>
+      </div>
+    </div>
   );
 }

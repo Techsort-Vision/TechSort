@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Button, Form, Input, Radio, Select, message } from "antd";
 import { useState } from "react";
 import { Check } from "lucide-react";
 import { PageHeader } from "@/components/site/PageHeader";
-import { GlowButton } from "@/components/site/GlowButton";
-import { SERVICES } from "@/lib/site-data";
+import { FormSuccessModal } from "@/components/site/FormSuccessModal";
+import { FormErrorModal } from "@/components/site/FormErrorModal";
+import { SERVICES, submitWeb3Form, WEB3FORMS_ACCESS_KEY } from "@/lib/site-data";
 
 export const Route = createFileRoute("/request-quote")({
   head: () => ({
@@ -20,8 +22,30 @@ export const Route = createFileRoute("/request-quote")({
 const STEPS = ["Project", "Scope", "Contact"];
 
 function Quote() {
+  const [form] = Form.useForm();
   const [step, setStep] = useState(0);
-  const [done, setDone] = useState(false);
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [errorOpen, setErrorOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    if (step < 2) {
+      setStep(step + 1);
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await submitWeb3Form(form.getFieldsValue(true), "TechSort quote request");
+      form.resetFields();
+      setStep(0);
+      setSuccessOpen(true);
+    } catch {
+      setErrorOpen(true);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <>
@@ -42,64 +66,72 @@ function Quote() {
               ))}
             </div>
 
-            {done ? (
-              <div className="text-center py-8">
-                <div className="text-5xl">🚀</div>
-                <h3 className="mt-3 text-2xl font-bold gradient-text">Proposal incoming</h3>
-                <p className="mt-2 text-sm text-muted-foreground">Check your inbox within 24 hours. We'll include scope, timeline and pricing.</p>
-              </div>
-            ) : (
-              <form onSubmit={(e) => { e.preventDefault(); if (step < 2) setStep(step + 1); else setDone(true); }} className="grid gap-3">
+              <Form form={form} layout="vertical" className="ant-form-modern grid gap-3" onFinish={handleSubmit} requiredMark={false}>
+                <Form.Item hidden name="access_key" initialValue={WEB3FORMS_ACCESS_KEY}>
+                  <Input />
+                </Form.Item>
                 {step === 0 && (
                   <>
-                    <Label>What kind of project?</Label>
-                    <select required className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm">
-                      <option value="">Select a service</option>
-                      {SERVICES.map((s) => <option key={s.slug}>{s.title}</option>)}
-                    </select>
-                    <Label>Brief description</Label>
-                    <textarea required rows={4} placeholder="What are you building?" className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm" />
+                    <Form.Item label="What kind of project?" name="service" rules={[{ required: true, message: "Please select a service" }]}>
+                      <Select
+                        placeholder="Select a service"
+                        options={SERVICES.map((s) => ({ label: s.title, value: s.slug }))}
+                      />
+                    </Form.Item>
+                    <Form.Item label="Brief description" name="description" rules={[{ required: true, message: "Please add a brief description" }]}>
+                      <Input.TextArea rows={4} placeholder="What are you building?" />
+                    </Form.Item>
                   </>
                 )}
                 {step === 1 && (
                   <>
-                    <Label>Budget range</Label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {["< $5k", "$5k–$15k", "$15k–$50k", "$50k+"].map((b) => (
-                        <label key={b} className="glass rounded-xl px-4 py-3 text-sm cursor-pointer hover:bg-white/10 flex items-center gap-2">
-                          <input type="radio" name="budget" required className="accent-sky" /> {b}
-                        </label>
-                      ))}
-                    </div>
-                    <Label>Timeline</Label>
-                    <select required className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm">
-                      <option>ASAP</option><option>1–3 months</option><option>3–6 months</option><option>Just exploring</option>
-                    </select>
+                    <Form.Item label="Budget range" name="budget" rules={[{ required: true, message: "Please select a budget" }]}>
+                      <Radio.Group className="grid grid-cols-2 gap-2">
+                        {["< $5k", "$5k–$15k", "$15k–$50k", "$50k+"].map((b) => (
+                          <Radio key={b} value={b} className="glass rounded-xl px-4 py-3 text-sm hover:bg-white/10">{b}</Radio>
+                        ))}
+                      </Radio.Group>
+                    </Form.Item>
+                    <Form.Item label="Timeline" name="timeline" rules={[{ required: true, message: "Please select a timeline" }]}>
+                      <Select
+                        placeholder="Select timeline"
+                        options={["ASAP", "1–3 months", "3–6 months", "Just exploring"].map((value) => ({ label: value, value }))}
+                      />
+                    </Form.Item>
                   </>
                 )}
                 {step === 2 && (
                   <>
-                    <Label>Full name</Label>
-                    <input required className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm" />
-                    <Label>Email</Label>
-                    <input required type="email" className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm" />
-                    <Label>Company</Label>
-                    <input className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm" />
+                    <Form.Item label="Full name" name="name" rules={[{ required: true, message: "Please enter your full name" }]}>
+                      <Input />
+                    </Form.Item>
+                    <Form.Item label="Email" name="email" rules={[{ required: true, type: "email", message: "Please enter a valid email" }]}>
+                      <Input />
+                    </Form.Item>
+                    <Form.Item label="Company" name="company">
+                      <Input />
+                    </Form.Item>
                   </>
                 )}
                 <div className="mt-2 flex gap-2">
-                  {step > 0 && <button type="button" onClick={() => setStep(step - 1)} className="rounded-full glass px-5 py-2.5 text-sm font-semibold">Back</button>}
-                  <GlowButton className="flex-1">{step === 2 ? "Submit" : "Continue"}</GlowButton>
+                  {step > 0 && <Button htmlType="button" onClick={() => setStep(step - 1)} className="rounded-full glass px-5 font-semibold">Back</Button>}
+                  <Button type="primary" htmlType="submit" loading={submitting} className="flex-1">{step === 2 ? "Submit" : "Continue"}</Button>
                 </div>
-              </form>
-            )}
+              </Form>
           </div>
         </div>
       </section>
+
+      <FormSuccessModal
+        open={successOpen}
+        onClose={() => setSuccessOpen(false)}
+        title="Proposal request submitted"
+        description="Nice. Your quote request is in. We will send scope, timeline and pricing within 24 hours."
+      />
+      <FormErrorModal 
+        open={errorOpen} 
+        onClose={() => setErrorOpen(false)} 
+      />
     </>
   );
-}
-
-function Label({ children }: { children: React.ReactNode }) {
-  return <div className="text-xs uppercase tracking-wider text-muted-foreground mt-2">{children}</div>;
 }

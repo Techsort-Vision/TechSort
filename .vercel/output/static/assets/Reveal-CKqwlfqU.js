@@ -1,1 +1,0 @@
-import{j as n,m as e}from"./index-CQNNW36S.js";const a={hidden:{opacity:0,y:24},show:(i=0)=>({opacity:1,y:0,transition:{duration:.6,delay:i*.06,ease:[.22,1,.36,1]}})};function r({children:i,delay:t=0,className:o}){return n.jsx(e.div,{custom:t,variants:a,initial:"hidden",whileInView:"show",viewport:{once:!0,margin:"-60px"},className:o,children:i})}export{r as R};

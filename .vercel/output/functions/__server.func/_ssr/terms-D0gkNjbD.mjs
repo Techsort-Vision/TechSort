@@ -13,6 +13,7 @@ import "util";
 import "crypto";
 import "async_hooks";
 import "stream";
+import "../_libs/scheduler.mjs";
 import "../_libs/isbot.mjs";
 import "../_libs/framer-motion.mjs";
 import "../_libs/motion-dom.mjs";

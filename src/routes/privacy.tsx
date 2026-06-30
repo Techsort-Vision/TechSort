@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/site/PageHeader";
+import { SITE } from "@/lib/site-data";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
@@ -24,9 +25,9 @@ function Privacy() {
             { h: "How we use information", p: "To respond to inquiries, deliver contracted services, improve our website and (with your permission) send occasional newsletters. We never sell your data." },
             { h: "Data retention", p: "Project data is retained for the duration of the engagement plus 24 months. Marketing data is retained until you unsubscribe." },
             { h: "Third parties", p: "We use Google Analytics, Cloudflare and standard email providers. All vendors are GDPR/CCPA compliant." },
-            { h: "Your rights", p: "You can request access, correction or deletion of your data at any time by emailing privacy@techsort.io. We respond within 30 days." },
+            { h: "Your rights", p: `You can request access, correction or deletion of your data at any time by emailing ${SITE.email}. We respond within 30 days.` },
             { h: "Security", p: "We use industry-standard encryption in transit and at rest. Access to your data is limited to engagement personnel only." },
-            { h: "Contact", p: "Questions about this policy? Email privacy@techsort.io or write to our office address." },
+            { h: "Contact", p: `Questions about this policy? Email ${SITE.email} or write to our office at ${SITE.address}.` },
           ].map((s) => (
             <div key={s.h}>
               <h2 className="text-xl font-bold text-foreground gradient-text">{s.h}</h2>
