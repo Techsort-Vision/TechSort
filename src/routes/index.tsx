@@ -75,7 +75,7 @@ function Hero() {
           className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[11px] font-medium tracking-wide text-muted-foreground"
         >
           <span className="size-1.5 rounded-full bg-primary" />
-          Premium IT studio · Est. 2019
+          Premium IT studio · Est. 2025
         </motion.div>
 
         <motion.h1
