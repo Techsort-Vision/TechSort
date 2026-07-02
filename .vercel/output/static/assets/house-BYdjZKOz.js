@@ -1,1 +1,0 @@
-import{aS as o}from"./index-C417_ihA.js";const a=[["path",{d:"m9 18 6-6-6-6",key:"mthhwq"}]],h=o("chevron-right",a);const e=[["path",{d:"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8",key:"5wwlr5"}],["path",{d:"M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",key:"r6nss1"}]],s=o("house",e);export{h as C,s as H};

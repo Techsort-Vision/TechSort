@@ -18,7 +18,6 @@ import { _ as _toConsumableArray, a as _createClass, b as _classCallCheck } from
 import { F as FormProvider$1, u as useForm$1, R as RefForm, C as Context, L as ListContext, W as WrapperField, a as List, b as useWatch } from "./rc-component__form.mjs";
 import { e } from "./scroll-into-view-if-needed.mjs";
 import { I as Input$2, T as TextArea$1 } from "./rc-component__input.mjs";
-import { N as Notification, u as useNotification, a as NotificationProvider, b as NotificationList } from "./rc-component__notification.mjs";
 import { D as DialogWrap, P as Panel } from "./rc-component__dialog.mjs";
 import { g as generate, p as presetPrimaryColors, a as presetPalettes } from "./ant-design__colors.mjs";
 import { U as Upload$2 } from "./rc-component__upload.mjs";
@@ -1627,7 +1626,7 @@ const ProviderChildren = (props) => {
     switch: SWITCH,
     transfer,
     avatar,
-    message: message2,
+    message,
     tag,
     table,
     card,
@@ -1735,7 +1734,7 @@ const ProviderChildren = (props) => {
     switch: SWITCH,
     transfer,
     avatar,
-    message: message2,
+    message,
     tag,
     table,
     card,
@@ -1908,26 +1907,6 @@ Object.defineProperty(ConfigProvider, "SizeContext", {
     return SizeContext;
   }
 });
-const useStackConfig = (stackConfig, defaultStackConfig) => reactExports.useMemo(() => {
-  const mergedStackConfig = stackConfig ?? defaultStackConfig;
-  if (!mergedStackConfig) {
-    return false;
-  }
-  return {
-    ...isPlainObject(defaultStackConfig) ? defaultStackConfig : {},
-    ...isPlainObject(mergedStackConfig) ? mergedStackConfig : {}
-  };
-}, [stackConfig, defaultStackConfig]);
-function getPlacementOffsetStyle(top, bottom) {
-  return {
-    ...isNonNullable(top) && {
-      "--notification-top": unit(top)
-    },
-    ...isNonNullable(bottom) && {
-      "--notification-bottom": unit(bottom)
-    }
-  };
-}
 function fallbackProp(...args) {
   return args.find((arg) => arg !== void 0);
 }
@@ -2152,989 +2131,6 @@ const useZIndex = (componentType, customZIndex) => {
   }
   return result;
 };
-const genNotificationItemMotionStyle = (token) => {
-  const {
-    motionDurationMid,
-    motionEaseInOut
-  } = token;
-  const transition = `${motionDurationMid} ${motionEaseInOut}`;
-  return {
-    transform: "scale(var(--notification-scale, 1))",
-    transition: ["transform", "inset", "clip-path", "opacity"].map((property) => `${property} ${transition}`).join(", ")
-  };
-};
-const genListItemSharedStyle = (token, config) => {
-  const {
-    componentCls,
-    antCls,
-    colorSuccess,
-    colorInfo,
-    colorWarning,
-    colorError,
-    colorTextHeading,
-    colorText,
-    boxShadow,
-    borderRadiusLG,
-    fontSize,
-    lineHeight,
-    notificationBg,
-    notificationPadding,
-    notificationMarginEdge,
-    margin,
-    calc
-  } = token;
-  const noticeCls = `${componentCls}-notice`;
-  const [varName, varRef] = genCssVar(antCls, "notification");
-  return {
-    [noticeCls]: {
-      // ============================== Base ==============================
-      position: "absolute",
-      width: config.width,
-      maxWidth: `calc(100vw - ${unit(calc(notificationMarginEdge).mul(2).equal())})`,
-      padding: notificationPadding,
-      pointerEvents: "auto",
-      [varName("icon-font-size")]: config.iconFontSize,
-      [varName("title-font-size")]: config.titleFontSize,
-      [varName("title-line-height")]: config.titleLineHeight,
-      boxSizing: "border-box",
-      color: colorText,
-      background: notificationBg,
-      borderRadius: borderRadiusLG,
-      boxShadow,
-      fontSize,
-      lineHeight,
-      wordWrap: "break-word",
-      overflow: "visible",
-      ...genNotificationItemMotionStyle(token),
-      ...config.noticeStyle,
-      "&::after": {
-        position: "absolute",
-        insetInline: 0,
-        top: calc(margin).mul(-1).equal(),
-        height: margin,
-        content: '""'
-      },
-      // ============================== Type ==============================
-      ...config.typeStyle && {
-        "&-success": {
-          background: varRef("color-success-bg", notificationBg)
-        },
-        "&-error": {
-          background: varRef("color-error-bg", notificationBg)
-        },
-        "&-info": {
-          background: varRef("color-info-bg", notificationBg)
-        },
-        "&-warning": {
-          background: varRef("color-warning-bg", notificationBg)
-        }
-      }
-    },
-    // ============================ Wrapper ============================
-    [`${noticeCls}-wrapper`]: {
-      display: "flex",
-      ...config.contentStyle
-    },
-    [`${noticeCls}-title`]: {
-      color: colorTextHeading,
-      fontSize: varRef("title-font-size"),
-      lineHeight: varRef("title-line-height")
-    },
-    // ============================= Icon =============================
-    // Icon & color style in different selector level
-    // https://github.com/ant-design/ant-design/issues/16503
-    // https://github.com/ant-design/ant-design/issues/15512
-    [`${noticeCls}-icon`]: {
-      flex: "none",
-      fontSize: varRef("icon-font-size"),
-      lineHeight: 1,
-      [`&${noticeCls}-icon-success`]: {
-        color: colorSuccess
-      },
-      [`&${noticeCls}-icon-info, &${noticeCls}-icon-loading`]: {
-        color: colorInfo
-      },
-      [`&${noticeCls}-icon-warning`]: {
-        color: colorWarning
-      },
-      [`&${noticeCls}-icon-error`]: {
-        color: colorError
-      }
-    }
-  };
-};
-const genNotificationItemStyle = (token) => {
-  const {
-    componentCls,
-    progressBg,
-    notificationProgressHeight,
-    fontSize,
-    borderRadiusLG,
-    width,
-    notificationIconSize,
-    colorText,
-    motionDurationMid,
-    fontSizeLG,
-    lineHeightLG,
-    marginSM,
-    marginXS,
-    paddingLG,
-    notificationPaddingVertical,
-    notificationPaddingHorizontal,
-    notificationCloseButtonSize,
-    colorIcon,
-    borderRadiusSM,
-    colorIconHover,
-    colorBgTextHover,
-    colorBgTextActive
-  } = token;
-  const noticeCls = `${componentCls}-notice`;
-  return {
-    ...genListItemSharedStyle(token, {
-      width,
-      iconFontSize: notificationIconSize,
-      titleFontSize: fontSizeLG,
-      titleLineHeight: lineHeightLG,
-      contentStyle: {
-        alignItems: "flex-start",
-        gap: marginSM
-      },
-      typeStyle: true
-    }),
-    [`${noticeCls}-section`]: {
-      display: "flex",
-      flexDirection: "column",
-      flex: "auto",
-      gap: marginXS,
-      minWidth: 0
-    },
-    [`${noticeCls}-description`]: {
-      color: colorText,
-      fontSize
-    },
-    [`${noticeCls}-closable`]: {
-      [`${noticeCls}-title, ${noticeCls}-description`]: {
-        paddingInlineEnd: paddingLG
-      },
-      [`${noticeCls}-title + ${noticeCls}-description`]: {
-        paddingInlineEnd: 0
-      }
-    },
-    // ============================ Close =============================
-    [`${noticeCls}-close`]: {
-      position: "absolute",
-      top: notificationPaddingVertical,
-      insetInlineEnd: notificationPaddingHorizontal,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      width: notificationCloseButtonSize,
-      height: notificationCloseButtonSize,
-      color: colorIcon,
-      background: "none",
-      border: "none",
-      borderRadius: borderRadiusSM,
-      outline: "none",
-      transition: ["color", "background-color"].map((prop) => `${prop} ${motionDurationMid}`).join(", "),
-      "&:hover": {
-        color: colorIconHover,
-        backgroundColor: colorBgTextHover
-      },
-      "&:active": {
-        backgroundColor: colorBgTextActive
-      },
-      ...genFocusStyle(token)
-    },
-    // =========================== Progress ===========================
-    [`${noticeCls}-progress`]: {
-      position: "absolute",
-      bottom: 0,
-      display: "block",
-      appearance: "none",
-      inlineSize: `calc(100% - ${unit(borderRadiusLG)} * 2)`,
-      blockSize: notificationProgressHeight,
-      border: 0,
-      left: {
-        _skip_check_: true,
-        value: borderRadiusLG
-      },
-      right: {
-        _skip_check_: true,
-        value: borderRadiusLG
-      },
-      "&, &::-webkit-progress-bar": {
-        borderRadius: borderRadiusLG,
-        backgroundColor: "rgba(0, 0, 0, 0.04)"
-      },
-      "&::-moz-progress-bar": {
-        background: progressBg
-      },
-      "&::-webkit-progress-value": {
-        borderRadius: borderRadiusLG,
-        background: progressBg
-      }
-    },
-    // ============================ Action ============================
-    [`${noticeCls}-actions`]: {
-      float: "right",
-      marginTop: marginSM
-    }
-  };
-};
-const genPurePanelStyle = (token) => {
-  const {
-    componentCls,
-    width
-  } = token;
-  const noticeCls = `${componentCls}-notice`;
-  const actionsCls = `${noticeCls}-actions`;
-  const notificationItemStyle = genNotificationItemStyle(token);
-  return {
-    [`${noticeCls}-pure-panel`]: {
-      width,
-      maxWidth: "100%",
-      ...notificationItemStyle,
-      [noticeCls]: {
-        ...notificationItemStyle[noticeCls],
-        position: "relative",
-        width: "100%",
-        maxWidth: "100%"
-      },
-      [actionsCls]: {
-        ...notificationItemStyle[actionsCls],
-        float: "none",
-        textAlign: "end"
-      }
-    }
-  };
-};
-const genNotificationStyle = (token) => {
-  const {
-    componentCls
-  } = token;
-  return {
-    [componentCls]: genNotificationItemStyle(token)
-  };
-};
-const NotificationPlacements = ["top", "topLeft", "topRight", "bottom", "bottomLeft", "bottomRight"];
-const notificationMarginEdgeVar = "--notification-margin-edge";
-const getPlacementOffset = (vertical, horizontal) => ({
-  blockEnd: vertical === "top" ? "bottom" : "top",
-  inlineEnd: horizontal === "left" ? "right" : "left"
-});
-const getMotionTransform = (motionOffset) => {
-  const x = motionOffset?.x ?? "0";
-  const y = motionOffset?.y ?? "0";
-  return `translate3d(${x}, ${y}, 0) scale(var(--notification-scale, 1))`;
-};
-const getPlacementStyleConfig = (placement, motionOffset) => {
-  const vertical = placement.startsWith("bottom") ? "bottom" : "top";
-  const horizontal = placement.endsWith("Right") ? "right" : "left";
-  const {
-    blockEnd,
-    inlineEnd
-  } = getPlacementOffset(vertical, horizontal);
-  const isCenterPlacement = placement === "top" || placement === "bottom";
-  const offset = placement === "top" || placement.endsWith("Left") ? `-${motionOffset}` : motionOffset;
-  return {
-    placement,
-    vertical,
-    blockEnd,
-    horizontal,
-    inlineEnd,
-    motionOffset: isCenterPlacement ? {
-      x: "-50%",
-      y: offset
-    } : {
-      x: offset
-    },
-    baseMotionOffset: isCenterPlacement ? {
-      x: "-50%"
-    } : void 0,
-    isCenterPlacement
-  };
-};
-const getPlacementFlexDirection = (vertical) => vertical === "bottom" ? "column-reverse" : "column";
-const getPlacementInset = (vertical) => {
-  const marginEdge = `var(${notificationMarginEdgeVar}, 0px)`;
-  return `calc(var(--notification-${vertical}, ${marginEdge}) - ${marginEdge})`;
-};
-const getPlacementTransformOrigin = (vertical) => vertical === "bottom" ? "center top" : "center bottom";
-const getStackShadowClipOffset = (token) => unit(token.calc(token.marginXXL).mul(-1).equal());
-const getStackNoticeClipPath$1 = (token) => {
-  const offset = getStackShadowClipOffset(token);
-  return `inset(${offset} ${offset} ${offset} ${offset})`;
-};
-const getPlacementStackClipPath = (token, vertical) => {
-  const offset = getStackShadowClipOffset(token);
-  return vertical === "bottom" ? `inset(${offset} ${offset} 50% ${offset})` : `inset(50% ${offset} ${offset} ${offset})`;
-};
-const genPlacementStyle = (token, config) => {
-  const {
-    componentCls
-  } = token;
-  const {
-    placement,
-    vertical,
-    blockEnd,
-    horizontal,
-    inlineEnd,
-    // Horizontal centered
-    isCenterPlacement
-  } = config;
-  const noticeCls = `${componentCls}-notice`;
-  const noticeMotionCls = `${noticeCls}${componentCls}-fade`;
-  const enterTransform = getMotionTransform(config.motionOffset);
-  const baseTransform = getMotionTransform(config.baseMotionOffset);
-  const transformOrigin = getPlacementTransformOrigin(vertical);
-  return {
-    [`&${componentCls}-${placement}`]: {
-      [vertical]: getPlacementInset(vertical),
-      [blockEnd]: "auto",
-      display: "flex",
-      flexDirection: getPlacementFlexDirection(vertical),
-      ...isCenterPlacement ? {
-        marginInline: 0,
-        left: "50%",
-        right: "auto",
-        transform: "translateX(-50%)"
-      } : {
-        [horizontal]: 0,
-        [inlineEnd]: "auto"
-      },
-      [noticeCls]: {
-        [vertical]: "var(--notification-y, 0)",
-        ...isCenterPlacement ? {
-          left: "50%",
-          transform: baseTransform
-        } : {
-          [horizontal]: "var(--notification-x, 0)"
-        },
-        transformOrigin
-      },
-      [`${noticeMotionCls}-appear-prepare, ${noticeMotionCls}-enter-prepare`]: {
-        opacity: 0,
-        transform: enterTransform,
-        transition: "none"
-      },
-      [`${noticeMotionCls}-appear-start, ${noticeMotionCls}-enter-start`]: {
-        opacity: 0,
-        transform: enterTransform
-      },
-      [`${noticeMotionCls}-appear-active, ${noticeMotionCls}-enter-active`]: {
-        opacity: 1,
-        transform: baseTransform
-      },
-      [`${noticeMotionCls}-leave-start`]: {
-        opacity: 1,
-        transform: baseTransform
-      },
-      [`${noticeMotionCls}-leave-active`]: {
-        opacity: 0,
-        transform: enterTransform
-      },
-      [`&${componentCls}-stack:not(${componentCls}-stack-expanded)`]: {
-        [noticeCls]: {
-          clipPath: getPlacementStackClipPath(token, vertical)
-        },
-        [`${noticeCls}[data-notification-index='0']`]: {
-          clipPath: getStackNoticeClipPath$1(token)
-        }
-      }
-    }
-  };
-};
-const genNotificationPlacementRootStyle = (token, placements = NotificationPlacements) => {
-  const {
-    notificationMotionOffset
-  } = token;
-  const motionOffset = unit(notificationMotionOffset);
-  return {
-    ...placements.reduce((styles, placement) => ({
-      ...styles,
-      ...genPlacementStyle(token, getPlacementStyleConfig(placement, motionOffset))
-    }), {})
-  };
-};
-const genNotificationPlacementStyle = (token) => {
-  const {
-    componentCls
-  } = token;
-  return {
-    [componentCls]: genNotificationPlacementRootStyle(token)
-  };
-};
-const DEFAULT_COLLAPSED_STACK_VISIBLE_COUNT = 3;
-const prepareComponentToken$a = (token) => ({
-  zIndexPopup: token.zIndexPopupBase + CONTAINER_MAX_OFFSET + 50,
-  width: 384,
-  progressBg: `linear-gradient(90deg, ${token.colorPrimaryBorderHover}, ${token.colorPrimary})`,
-  // Fix notification background color issue
-  // https://github.com/ant-design/ant-design/issues/55649
-  // https://github.com/ant-design/ant-design/issues/56055
-  colorSuccessBg: void 0,
-  colorErrorBg: void 0,
-  colorInfoBg: void 0,
-  colorWarningBg: void 0
-});
-const prepareNotificationToken = (token) => {
-  const notificationPaddingVertical = token.paddingMD;
-  const notificationPaddingHorizontal = token.paddingLG;
-  const notificationToken = merge$1(token, {
-    notificationBg: token.colorBgElevated,
-    notificationPaddingVertical,
-    notificationPaddingHorizontal,
-    notificationIconSize: token.calc(token.fontSizeLG).mul(token.lineHeightLG).equal(),
-    notificationCloseButtonSize: token.calc(token.controlHeightLG).mul(0.55).equal(),
-    notificationMarginBottom: token.margin,
-    notificationPadding: `${unit(token.paddingMD)} ${unit(token.paddingContentHorizontalLG)}`,
-    notificationMarginEdge: token.marginLG,
-    notificationProgressHeight: 2,
-    notificationMotionOffset: 64
-  });
-  return notificationToken;
-};
-const getStackNoticeClipPath = (offset) => `inset(${offset} ${offset} ${offset} ${offset})`;
-const genNotificationListContentStyle = (token) => {
-  const {
-    componentCls,
-    motionDurationMid,
-    motionDurationSlow,
-    motionEaseInOut
-  } = token;
-  const listCls = `${componentCls}-list`;
-  const listContentCls = `${listCls}-content`;
-  return {
-    [listContentCls]: {
-      position: "relative",
-      display: "flex",
-      flexShrink: 0,
-      flexDirection: "column",
-      gap: token.notificationMarginBottom,
-      width: "100%",
-      willChange: "height, transform",
-      transition: "none",
-      [`&${listContentCls}-decrease`]: {
-        transition: `height calc(${motionDurationSlow} * 2) ${motionEaseInOut} ${motionDurationMid}`
-      }
-    },
-    // ============================ Motion ============================
-    [`${componentCls}-fade`]: {
-      backfaceVisibility: "hidden",
-      willChange: "transform, opacity"
-    }
-  };
-};
-const genNotificationListStyle = (token, config) => {
-  const {
-    componentCls,
-    notificationMarginEdge
-  } = token;
-  const notificationMarginEdgeVar2 = "--notification-margin-edge";
-  const noticeCls = `${componentCls}-notice`;
-  const listCls = `${componentCls}-list`;
-  const listWidth = config.listWidthKey ? token.calc(token[config.listWidthKey]).add(token.calc(notificationMarginEdge).mul(2)).equal() : "100%";
-  const stackVisibleCount = config.stackVisibleCount ?? DEFAULT_COLLAPSED_STACK_VISIBLE_COUNT;
-  const noticeBeyondStackVisibleCountCls = `${noticeCls}:nth-last-child(n + ${stackVisibleCount + 1})`;
-  const stackShadowClipOffset = unit(token.calc(token.marginXXL).mul(-1).equal());
-  const stackNoticeClipPath = getStackNoticeClipPath(stackShadowClipOffset);
-  return {
-    [componentCls]: {
-      ...resetComponent(token),
-      [notificationMarginEdgeVar2]: unit(notificationMarginEdge),
-      // ============================ Holder ============================
-      position: "fixed",
-      zIndex: token.zIndexPopup,
-      width: listWidth,
-      maxWidth: "100vw",
-      height: "100vh",
-      overflow: "hidden",
-      overscrollBehavior: "contain",
-      [`${componentCls}-hook-holder`]: {
-        position: "relative"
-      },
-      // ============================= List =============================
-      [`&${listCls}`]: {
-        maxHeight: "100vh",
-        padding: `var(${notificationMarginEdgeVar2})`,
-        overflowX: "hidden",
-        overflowY: "auto",
-        overscrollBehavior: "contain",
-        scrollbarWidth: "none",
-        msOverflowStyle: "none",
-        pointerEvents: "none",
-        "&::-webkit-scrollbar": {
-          display: "none",
-          width: 0,
-          height: 0
-        }
-      },
-      ...genNotificationListContentStyle(token),
-      // ============================ Stack ============================
-      [`&${componentCls}-stack`]: {
-        [noticeCls]: {
-          clipPath: stackNoticeClipPath
-        },
-        [`&:not(${componentCls}-stack-expanded)`]: {
-          [noticeCls]: {
-            "--notification-scale": "calc(1 - min(var(--notification-index, 0), 2) * 0.06)"
-          },
-          [`${noticeCls}:not(${noticeCls}-stack-in-threshold)`]: {
-            opacity: 0,
-            pointerEvents: "none"
-          },
-          [noticeBeyondStackVisibleCountCls]: {
-            opacity: 0,
-            pointerEvents: "none"
-          }
-        }
-      },
-      // ============================== RTL =============================
-      "&-rtl": {
-        direction: "rtl",
-        [`${noticeCls}-actions`]: {
-          float: "left"
-        }
-      }
-    }
-  };
-};
-genSubStyleComponent(["Notification", "PurePanel"], (token) => genPurePanelStyle(prepareNotificationToken(token)), prepareComponentToken$a);
-const sharedGenerateStyle = (token, config) => {
-  const itemStyle = config.itemStyle ?? genNotificationStyle;
-  return [genNotificationListStyle(token, config), itemStyle(token), genNotificationPlacementStyle(token)];
-};
-genStyleHooks("Notification", (token) => {
-  const notificationToken = prepareNotificationToken(token);
-  return sharedGenerateStyle(notificationToken, {
-    listWidthKey: "width"
-  });
-}, prepareComponentToken$a);
-const prepareMessageToken = (token) => {
-  const messagePaddingVertical = token.calc(token.controlHeightLG).sub(token.calc(token.fontSize).mul(token.lineHeight)).div(2).equal();
-  const messagePaddingHorizontal = token.paddingSM;
-  return merge$1(prepareNotificationToken(token), {
-    notificationBg: token.contentBg,
-    notificationPadding: token.contentPadding,
-    notificationPaddingVertical: messagePaddingVertical,
-    notificationPaddingHorizontal: messagePaddingHorizontal
-  });
-};
-const prepareComponentToken$9 = (token) => ({
-  zIndexPopup: token.zIndexPopupBase + CONTAINER_MAX_OFFSET + 10,
-  contentBg: token.colorBgElevated,
-  contentPadding: `${(token.controlHeightLG - token.fontSize * token.lineHeight) / 2}px ${token.paddingSM}px`
-});
-const genMessageItemStyle = (token) => {
-  const {
-    fontSize,
-    fontSizeLG,
-    lineHeight
-  } = token;
-  return genListItemSharedStyle(token, {
-    // Adjust card style since Message is not same as Notification.
-    // Message needs horizontal center and not fix width.
-    width: "max-content",
-    iconFontSize: fontSizeLG,
-    titleFontSize: fontSize,
-    titleLineHeight: lineHeight,
-    contentStyle: {
-      alignItems: "center",
-      gap: token.marginXS
-    },
-    noticeStyle: {
-      zIndex: 1
-    }
-  });
-};
-const generateMessageStackStyle = (token) => {
-  const {
-    componentCls
-  } = token;
-  const noticeCls = `${componentCls}-notice`;
-  const listContentCls = `${componentCls}-list-content`;
-  const messageItemStyle = genMessageItemStyle(token);
-  const {
-    "&::after": _hoverAfterStyle,
-    ...messageNoticeStyle
-  } = messageItemStyle[noticeCls];
-  const placeholderStyle = {
-    ...messageNoticeStyle,
-    position: "absolute",
-    zIndex: -1,
-    left: "50%",
-    height: token.calc(token.marginXS).mul(2).equal(),
-    padding: 0,
-    boxShadow: token.boxShadowTertiary,
-    opacity: 0,
-    pointerEvents: "none",
-    transform: "translateX(-50%) translateY(100%)",
-    transition: [`opacity ${token.motionDurationFast} ${token.motionEaseInOut}`, `transform ${token.motionDurationFast} ${token.motionEaseInOut}`, `width ${token.motionDurationSlow} ${token.motionEaseInOut}`].join(", "),
-    content: '""'
-  };
-  return {
-    [componentCls]: {
-      [`&${componentCls}-stack`]: {
-        [listContentCls]: {
-          isolation: "isolate",
-          "&::before": {
-            ...placeholderStyle,
-            top: `calc(var(--top-notificiation-height) - ${unit(token.marginXS)})`,
-            width: `calc(var(--top-notificiation-width) - ${unit(token.margin)})`
-          },
-          "&::after": {
-            ...placeholderStyle,
-            zIndex: -2,
-            top: "var(--top-notificiation-height)",
-            width: `calc(var(--top-notificiation-width) - ${unit(token.calc(token.margin).mul(2).equal())})`
-          }
-        },
-        [`&:not(${componentCls}-stack-expanded)`]: {
-          [listContentCls]: {
-            "&::before, &::after": {
-              opacity: 1,
-              transform: "translateX(-50%) translateY(0)"
-            }
-          }
-        }
-      }
-    }
-  };
-};
-const generateMessagePurePanelStyle = (token) => {
-  const {
-    componentCls
-  } = token;
-  const noticeCls = `${componentCls}-notice`;
-  const messageItemStyle = genMessageItemStyle(token);
-  return {
-    [`${noticeCls}-pure-panel`]: {
-      width: "max-content",
-      maxWidth: "100%",
-      ...messageItemStyle,
-      [noticeCls]: {
-        ...messageItemStyle[noticeCls],
-        position: "relative",
-        width: "max-content",
-        maxWidth: "100%"
-      }
-    }
-  };
-};
-const PurePanelStyle = genSubStyleComponent(["Message", "PurePanel"], (token) => generateMessagePurePanelStyle(prepareMessageToken(token)), prepareComponentToken$9);
-const generateMessageStyle = (token) => ({
-  [token.componentCls]: genMessageItemStyle(token)
-});
-const useStyle$h = genStyleHooks("Message", (token) => {
-  const messageToken = prepareMessageToken(token);
-  return [sharedGenerateStyle(messageToken, {
-    stackVisibleCount: 1,
-    itemStyle: generateMessageStyle
-  }), generateMessageStackStyle(messageToken)];
-}, prepareComponentToken$9);
-const TypeIcon = {
-  info: /* @__PURE__ */ reactExports.createElement(RefIcon$5, null),
-  success: /* @__PURE__ */ reactExports.createElement(RefIcon$4, null),
-  error: /* @__PURE__ */ reactExports.createElement(RefIcon, null),
-  warning: /* @__PURE__ */ reactExports.createElement(RefIcon$3, null),
-  loading: /* @__PURE__ */ reactExports.createElement(RefIcon$2, null)
-};
-const getMessageIcon = (type, icon) => icon || type && TypeIcon[type] || null;
-const PurePanel$4 = (props) => {
-  const {
-    prefixCls: staticPrefixCls,
-    className,
-    style,
-    type,
-    icon,
-    content,
-    classNames: messageClassNames,
-    styles,
-    ...restProps
-  } = props;
-  const {
-    getPrefixCls,
-    className: contextClassName,
-    style: contextStyle,
-    classNames: contextClassNames,
-    styles: contextStyles
-  } = useComponentConfig("message");
-  const prefixCls = staticPrefixCls || getPrefixCls("message");
-  const noticePrefixCls = `${prefixCls}-notice`;
-  const rootCls = useCSSVarCls(prefixCls);
-  const [hashId, cssVarCls] = useStyle$h(prefixCls, rootCls);
-  const [mergedClassNames, mergedStyles] = useMergeSemantic([contextClassNames, messageClassNames], [contextStyles, styles], {
-    props
-  });
-  const iconNode = getMessageIcon(type, icon);
-  const typeIconCls = type ? `${noticePrefixCls}-icon-${type}` : void 0;
-  const rcClassNames = {
-    wrapper: clsx(type && `${prefixCls}-${type}`, mergedClassNames.wrapper),
-    icon: clsx(typeIconCls, mergedClassNames.icon),
-    title: mergedClassNames.title
-  };
-  const rcStyles = {
-    wrapper: mergedStyles.wrapper,
-    icon: mergedStyles.icon,
-    title: mergedStyles.title
-  };
-  return /* @__PURE__ */ reactExports.createElement("div", {
-    className: clsx(`${noticePrefixCls}-pure-panel`, hashId, className, cssVarCls, rootCls, mergedClassNames.root),
-    style: mergedStyles.root
-  }, /* @__PURE__ */ reactExports.createElement(PurePanelStyle, {
-    prefixCls
-  }), /* @__PURE__ */ reactExports.createElement(Notification, {
-    ...restProps,
-    prefixCls,
-    className: contextClassName,
-    style: {
-      ...contextStyle,
-      ...style
-    },
-    duration: null,
-    icon: iconNode,
-    title: content,
-    classNames: rcClassNames,
-    styles: rcStyles
-  }));
-};
-function getMotion(prefixCls, transitionName) {
-  return {
-    motionName: transitionName ?? `${prefixCls}-fade`
-  };
-}
-function wrapPromiseFn(openFn) {
-  let closeFn;
-  const closePromise = new Promise((resolve) => {
-    closeFn = openFn(() => {
-      resolve(true);
-    });
-  });
-  const result = () => {
-    closeFn?.();
-  };
-  result.then = (filled, rejected) => closePromise.then(filled, rejected);
-  result.promise = closePromise;
-  return result;
-}
-const DEFAULT_OFFSET = 8;
-const DEFAULT_DURATION = 3;
-const DEFAULT_STACK_CONFIG = false;
-const Wrapper = ({
-  children,
-  prefixCls
-}) => {
-  const rootCls = useCSSVarCls(prefixCls);
-  const [hashId, cssVarCls] = useStyle$h(prefixCls, rootCls);
-  return /* @__PURE__ */ reactExports.createElement(NotificationProvider, {
-    classNames: {
-      list: clsx(hashId, cssVarCls, rootCls)
-    }
-  }, children);
-};
-const renderNotifications = (node, {
-  prefixCls,
-  key
-}) => /* @__PURE__ */ reactExports.createElement(Wrapper, {
-  prefixCls,
-  key
-}, node);
-const Holder = /* @__PURE__ */ reactExports.forwardRef((props, ref) => {
-  const {
-    // Placement
-    top,
-    // Config
-    prefixCls: staticPrefixCls,
-    getContainer: staticGetContainer,
-    maxCount,
-    duration = DEFAULT_DURATION,
-    // Style
-    rtl,
-    classNames,
-    styles,
-    // Motion
-    transitionName,
-    // UI
-    pauseOnHover = true,
-    stack,
-    // Life Cycle
-    onAllRemoved
-  } = props;
-  const {
-    getPrefixCls,
-    direction,
-    getPopupContainer
-  } = useComponentConfig("message");
-  const {
-    message: message2
-  } = reactExports.useContext(ConfigContext);
-  const prefixCls = staticPrefixCls || getPrefixCls("message");
-  const [mergedClassNames, mergedStyles] = useMergeSemantic([message2?.classNames, classNames], [message2?.styles, styles], {
-    props
-  });
-  const getStyle = () => getPlacementOffsetStyle(top ?? DEFAULT_OFFSET);
-  const getClassName = () => clsx({
-    [`${prefixCls}-rtl`]: rtl ?? direction === "rtl"
-  });
-  const getNotificationMotion = () => getMotion(prefixCls, transitionName);
-  const stackConfig = useStackConfig(stack, DEFAULT_STACK_CONFIG);
-  const [api, holder] = useNotification({
-    prefixCls,
-    style: getStyle,
-    className: getClassName,
-    motion: getNotificationMotion,
-    // closable=false requires-no closeIcon
-    closable: false,
-    duration,
-    getContainer: () => staticGetContainer?.() || getPopupContainer?.() || document.body,
-    maxCount,
-    onAllRemoved,
-    classNames: mergedClassNames,
-    styles: mergedStyles,
-    renderNotifications,
-    pauseOnHover,
-    stack: stackConfig
-  });
-  reactExports.useImperativeHandle(ref, () => ({
-    ...api,
-    prefixCls,
-    message: message2
-  }));
-  return holder;
-});
-let keyIndex = 0;
-function useInternalMessage(messageConfig) {
-  const holderRef = reactExports.useRef(null);
-  const wrapAPI = reactExports.useMemo(() => {
-    const close = (key) => {
-      holderRef.current?.close(key);
-    };
-    const open2 = (config) => {
-      if (!holderRef.current) {
-        const fakeResult = () => {
-        };
-        fakeResult.then = () => {
-        };
-        return fakeResult;
-      }
-      const {
-        open: originOpen,
-        prefixCls,
-        message: message2
-      } = holderRef.current;
-      const contextClassName = message2?.className || {};
-      const contextStyle = message2?.style || {};
-      const noticePrefixCls = `${prefixCls}-notice`;
-      const {
-        content,
-        icon,
-        type,
-        key,
-        className,
-        style,
-        onClose,
-        classNames: configClassNames = {},
-        styles = {},
-        ...restConfig
-      } = config;
-      let mergedKey = key;
-      if (!isNonNullable(mergedKey)) {
-        keyIndex += 1;
-        mergedKey = `antd-message-${keyIndex}`;
-      }
-      const contextConfig = {
-        ...messageConfig,
-        ...config
-      };
-      const semanticClassNames = resolveStyleOrClass(configClassNames, {
-        props: contextConfig
-      });
-      const semanticStyles = resolveStyleOrClass(styles, {
-        props: contextConfig
-      });
-      const iconNode = getMessageIcon(type, icon);
-      const typeIconCls = type ? `${noticePrefixCls}-icon-${type}` : void 0;
-      return wrapPromiseFn((resolve) => {
-        originOpen({
-          ...restConfig,
-          key: mergedKey,
-          icon: iconNode,
-          title: content,
-          classNames: {
-            ...semanticClassNames,
-            wrapper: clsx(type && `${prefixCls}-${type}`, semanticClassNames.wrapper),
-            icon: clsx(typeIconCls, semanticClassNames.icon)
-          },
-          styles: semanticStyles,
-          placement: "top",
-          className: clsx({
-            [`${noticePrefixCls}-${type}`]: type
-          }, className, contextClassName),
-          style: {
-            ...contextStyle,
-            ...style
-          },
-          onClose: () => {
-            onClose?.();
-            resolve();
-          }
-        });
-        return () => {
-          close(mergedKey);
-        };
-      });
-    };
-    const destroy2 = (key) => {
-      if (key !== void 0) {
-        close(key);
-      } else {
-        holderRef.current?.destroy();
-      }
-    };
-    const clone = {
-      open: open2,
-      destroy: destroy2
-    };
-    const keys = ["info", "success", "warning", "error", "loading"];
-    keys.forEach((type) => {
-      const typeOpen2 = (jointContent, duration, onClose) => {
-        let config;
-        if (isPlainObject(jointContent) && "content" in jointContent) {
-          config = jointContent;
-        } else {
-          config = {
-            content: jointContent
-          };
-        }
-        let mergedDuration;
-        let mergedOnClose;
-        if (isFunction(duration)) {
-          mergedOnClose = duration;
-        } else {
-          mergedDuration = duration;
-          mergedOnClose = onClose;
-        }
-        const mergedConfig = {
-          onClose: mergedOnClose,
-          duration: mergedDuration,
-          ...config,
-          type
-        };
-        return open2(mergedConfig);
-      };
-      clone[type] = typeOpen2;
-    });
-    return clone;
-  }, []);
-  return [wrapAPI, /* @__PURE__ */ reactExports.createElement(Holder, {
-    key: "message-holder",
-    ...messageConfig,
-    ref: holderRef
-  })];
-}
-function useMessage(messageConfig) {
-  return useInternalMessage(messageConfig);
-}
 const getCollapsedHeight = () => ({
   height: 0,
   opacity: 0
@@ -7047,7 +6043,7 @@ const Modal$1 = (props) => {
     prefixCls: customizePrefixCls,
     className,
     rootClassName,
-    open: open2,
+    open,
     wrapClassName,
     centered,
     getContainer,
@@ -7203,7 +6199,7 @@ const Modal$1 = (props) => {
     rootClassName: clsx(hashId, rootClassName, cssVarCls, rootCls, mergedClassNames.root),
     rootStyle: mergedStyles.root,
     footer: dialogFooter,
-    visible: open2,
+    visible: open,
     mousePosition: customizeMousePosition ?? mousePosition,
     onClose: handleCancel,
     closable: mergedClosable,
@@ -7565,7 +6561,7 @@ function confirm(config) {
     open: true
   };
   let timeoutId;
-  function destroy2(...args) {
+  function destroy(...args) {
     const triggerCancel = args.some((param) => param?.triggerCancel);
     if (triggerCancel) {
       config.onCancel?.(() => {
@@ -7605,7 +6601,7 @@ function confirm(config) {
         if (isFunction(config.afterClose)) {
           config.afterClose();
         }
-        destroy2.apply(this, args);
+        destroy.apply(this, args);
       }
     };
     scheduleRender(currentConfig);
@@ -7669,7 +6665,7 @@ const HookModal = /* @__PURE__ */ reactExports.forwardRef((props, ref) => {
     config,
     ...restProps
   } = props;
-  const [open2, setOpen] = reactExports.useState(true);
+  const [open, setOpen] = reactExports.useState(true);
   const [innerConfig, setInnerConfig] = reactExports.useState(config);
   const {
     direction,
@@ -7708,7 +6704,7 @@ const HookModal = /* @__PURE__ */ reactExports.forwardRef((props, ref) => {
     rootPrefixCls,
     ...innerConfig,
     close,
-    open: open2,
+    open,
     afterClose,
     okText: innerConfig.okText || (mergedOkCancel ? contextLocale?.okText : contextLocale?.justOkText),
     direction: innerConfig.direction || direction,
@@ -7801,7 +6797,6 @@ function useModal() {
     ref: holderRef
   })];
 }
-const AppConfigContext = /* @__PURE__ */ React.createContext({});
 function withPureRenderTheme(Component) {
   return (props) => /* @__PURE__ */ reactExports.createElement(ConfigProvider, {
     theme: {
@@ -7823,7 +6818,7 @@ const genPurePanel = (Component, alignPropName, postProps, defaultPrefixCls2, ge
     const holderRef = reactExports.useRef(null);
     const [popupHeight, setPopupHeight] = reactExports.useState(0);
     const [popupWidth, setPopupWidth] = reactExports.useState(0);
-    const [open2, setOpen] = useControlledState(false, props.open);
+    const [open, setOpen] = useControlledState(false, props.open);
     const {
       getPrefixCls
     } = reactExports.useContext(ConfigContext);
@@ -7856,7 +6851,7 @@ const genPurePanel = (Component, alignPropName, postProps, defaultPrefixCls2, ge
         ...style,
         margin: 0
       },
-      open: open2,
+      open,
       getPopupContainer: () => holderRef.current
     };
     {
@@ -9171,10 +8166,10 @@ function useIcons({
       })));
     } else {
       mergedSuffixIcon = ({
-        open: open2,
+        open,
         showSearch
       }) => {
-        if (open2 && showSearch) {
+        if (open && showSearch) {
           return getSuffixIconNode(fallbackProp(searchIcon, contextSearchIcon, /* @__PURE__ */ reactExports.createElement(RefIcon$7, null)));
         }
         return getSuffixIconNode(fallbackProp(contextSuffixIcon, /* @__PURE__ */ reactExports.createElement(RefIcon$8, null)));
@@ -10253,7 +9248,7 @@ const InternalTooltip = /* @__PURE__ */ reactExports.forwardRef((props, ref) => 
     nativeElement: tooltipRef.current?.nativeElement,
     popupElement: tooltipRef.current?.popupElement
   }));
-  const [open2, setOpen] = useControlledState(props.defaultOpen ?? false, props.open);
+  const [open, setOpen] = useControlledState(props.defaultOpen ?? false, props.open);
   const noTitle = !title && !overlay && title !== 0;
   const onInternalOpenChange = (vis) => {
     setOpen(noTitle ? false : vis);
@@ -10292,7 +9287,7 @@ const InternalTooltip = /* @__PURE__ */ reactExports.forwardRef((props, ref) => 
   });
   const prefixCls = getPrefixCls("tooltip", customizePrefixCls);
   const rootPrefixCls = getPrefixCls();
-  let tempOpen = open2;
+  let tempOpen = open;
   if (!("open" in props) && noTitle || inTableMeasureRow) {
     tempOpen = false;
   }
@@ -15396,274 +14391,6 @@ Input.Search = Search;
 Input.TextArea = TextArea;
 Input.Password = Password;
 Input.OTP = OTP;
-const PureList = (props) => {
-  const {
-    items,
-    classNames,
-    style
-  } = props;
-  const {
-    getPrefixCls
-  } = useComponentConfig("message");
-  const prefixCls = getPrefixCls("message");
-  const rootCls = useCSSVarCls(prefixCls);
-  const [hashId, cssVarCls] = useStyle$h(prefixCls, rootCls);
-  const noticePrefixCls = `${prefixCls}-notice`;
-  const configList = items.map((item) => {
-    const {
-      content,
-      duration,
-      key,
-      type
-    } = item;
-    const typeIconCls = type ? `${noticePrefixCls}-icon-${type}` : void 0;
-    return {
-      key,
-      duration,
-      icon: getMessageIcon(type),
-      title: content,
-      className: `${noticePrefixCls}-${type}`,
-      classNames: {
-        wrapper: `${prefixCls}-${type}`,
-        icon: typeIconCls
-      }
-    };
-  });
-  return /* @__PURE__ */ reactExports.createElement(NotificationList, {
-    prefixCls,
-    placement: "top",
-    configList,
-    className: clsx(hashId, cssVarCls, rootCls),
-    classNames: {
-      ...classNames,
-      wrapper: classNames?.wrapper,
-      title: classNames?.title
-    },
-    style,
-    stack: false
-  });
-};
-let message = null;
-let act = (callback) => callback();
-let taskQueue = [];
-let defaultGlobalConfig = {};
-function getGlobalContext() {
-  const {
-    getContainer,
-    duration,
-    rtl,
-    maxCount,
-    top,
-    stack
-  } = defaultGlobalConfig;
-  const mergedContainer = getContainer?.() || document.body;
-  return {
-    getContainer: () => mergedContainer,
-    duration,
-    rtl,
-    maxCount,
-    top,
-    stack
-  };
-}
-const GlobalHolder = /* @__PURE__ */ React.forwardRef((props, ref) => {
-  const {
-    messageConfig,
-    sync
-  } = props;
-  const {
-    getPrefixCls
-  } = reactExports.useContext(ConfigContext);
-  const prefixCls = defaultGlobalConfig.prefixCls || getPrefixCls("message");
-  const appConfig = reactExports.useContext(AppConfigContext);
-  const [api, holder] = useInternalMessage({
-    ...messageConfig,
-    prefixCls,
-    ...appConfig.message
-  });
-  React.useImperativeHandle(ref, () => {
-    const instance = {
-      ...api
-    };
-    Object.keys(instance).forEach((method) => {
-      instance[method] = (...args) => {
-        sync();
-        return api[method].apply(api, args);
-      };
-    });
-    return {
-      instance,
-      sync
-    };
-  });
-  return holder;
-});
-const GlobalHolderWrapper = /* @__PURE__ */ React.forwardRef((_, ref) => {
-  const [messageConfig, setMessageConfig] = React.useState(getGlobalContext);
-  const sync = () => {
-    setMessageConfig(getGlobalContext);
-  };
-  React.useEffect(sync, []);
-  const global = globalConfig();
-  const rootPrefixCls = global.getRootPrefixCls();
-  const rootIconPrefixCls = global.getIconPrefixCls();
-  const theme = global.getTheme();
-  const dom = /* @__PURE__ */ React.createElement(GlobalHolder, {
-    ref,
-    sync,
-    messageConfig
-  });
-  return /* @__PURE__ */ React.createElement(ConfigProvider, {
-    prefixCls: rootPrefixCls,
-    iconPrefixCls: rootIconPrefixCls,
-    theme
-  }, global.holderRender ? global.holderRender(dom) : dom);
-});
-const flushMessageQueue = () => {
-  if (!message) {
-    const holderFragment = document.createDocumentFragment();
-    const newMessage = {
-      fragment: holderFragment
-    };
-    message = newMessage;
-    act(() => {
-      render(/* @__PURE__ */ React.createElement(GlobalHolderWrapper, {
-        ref: (node) => {
-          const {
-            instance,
-            sync
-          } = node || {};
-          Promise.resolve().then(() => {
-            if (!newMessage.instance && instance) {
-              newMessage.instance = instance;
-              newMessage.sync = sync;
-              flushMessageQueue();
-            }
-          });
-        }
-      }), holderFragment);
-    });
-    return;
-  }
-  if (!message.instance) {
-    return;
-  }
-  taskQueue.forEach((task) => {
-    const {
-      type,
-      skipped
-    } = task;
-    if (!skipped) {
-      switch (type) {
-        case "open": {
-          act(() => {
-            const closeFn = message.instance.open({
-              ...defaultGlobalConfig,
-              ...task.config
-            });
-            closeFn?.then(task.resolve);
-            task.setCloseFn(closeFn);
-          });
-          break;
-        }
-        case "destroy":
-          act(() => {
-            message?.instance.destroy(task.key);
-          });
-          break;
-        // Other type open
-        default: {
-          act(() => {
-            var _message$instance;
-            const closeFn = (_message$instance = message.instance)[type].apply(_message$instance, _toConsumableArray(task.args));
-            closeFn?.then(task.resolve);
-            task.setCloseFn(closeFn);
-          });
-        }
-      }
-    }
-  });
-  taskQueue = [];
-};
-function setMessageGlobalConfig(config) {
-  defaultGlobalConfig = {
-    ...defaultGlobalConfig,
-    ...config
-  };
-  act(() => {
-    message?.sync?.();
-  });
-}
-function open(config) {
-  const result = wrapPromiseFn((resolve) => {
-    let closeFn;
-    const task = {
-      type: "open",
-      config,
-      resolve,
-      setCloseFn: (fn) => {
-        closeFn = fn;
-      }
-    };
-    taskQueue.push(task);
-    return () => {
-      if (closeFn) {
-        act(() => {
-          closeFn();
-        });
-      } else {
-        task.skipped = true;
-      }
-    };
-  });
-  flushMessageQueue();
-  return result;
-}
-function typeOpen(type, args) {
-  const result = wrapPromiseFn((resolve) => {
-    let closeFn;
-    const task = {
-      type,
-      args,
-      resolve,
-      setCloseFn: (fn) => {
-        closeFn = fn;
-      }
-    };
-    taskQueue.push(task);
-    return () => {
-      if (closeFn) {
-        act(() => {
-          closeFn();
-        });
-      } else {
-        task.skipped = true;
-      }
-    };
-  });
-  flushMessageQueue();
-  return result;
-}
-const destroy = (key) => {
-  taskQueue.push({
-    type: "destroy",
-    key
-  });
-  flushMessageQueue();
-};
-const methods = ["success", "info", "warning", "error", "loading"];
-const baseStaticMethods = {
-  open,
-  destroy,
-  config: setMessageGlobalConfig,
-  useMessage,
-  _InternalPanelDoNotUseOrYouWillBeFired: PurePanel$4,
-  _InternalListDoNotUseOrYouWillBeFired: PureList
-};
-const staticMethods = baseStaticMethods;
-methods.forEach((type) => {
-  staticMethods[type] = (...args) => typeOpen(type, args);
-});
 const PurePanel = (props) => {
   const {
     prefixCls: customizePrefixCls,
@@ -17282,9 +16009,9 @@ const ListItem = /* @__PURE__ */ reactExports.forwardRef(({
       className: clsx(`${prefixCls}-list-item-progress`, motionClassName)
     }, loadingProgress);
   }));
-  const message2 = file.response && typeof file.response === "string" ? file.response : file.error?.statusText || file.error?.message || locale2.uploadError;
+  const message = file.response && typeof file.response === "string" ? file.response : file.error?.statusText || file.error?.message || locale2.uploadError;
   const item = mergedStatus === "error" ? /* @__PURE__ */ reactExports.createElement(Tooltip, {
-    title: message2,
+    title: message,
     getPopupContainer: (node) => node.parentNode
   }, dom) : dom;
   return /* @__PURE__ */ reactExports.createElement("div", {
@@ -17890,6 +16617,5 @@ export {
   Modal as M,
   Radio as R,
   Select as S,
-  Upload as U,
-  staticMethods as s
+  Upload as U
 };
